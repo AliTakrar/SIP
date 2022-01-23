@@ -1,13 +1,8 @@
 <script>
   import Header from "./UI/Header.svelte";
   import AgreezGrid from "./Features/AgreezGrid.svelte";
-
-  let title = '';
-  let subtitle = ''; 
-  let address = '';
-  let email = '';
-  let description = '';
-  let imageUrl = '';
+  import EditAgreez from "./Features/EditAgreez.svelte";
+  import Button from "./UI/Button.svelte";
 
   let agreezs = [
     {
@@ -16,71 +11,77 @@
       subtitle: "Agreez what programing languages are suited for our needs",
       description:
         "In this agreez , we will have some experts in frontend and backend programing languages",
-      imageUrl: "https://miro.medium.com/max/1400/1*L5QyrMNalM3yhtgdgBcvkQ.png",
+      imageUrl:
+        "http://101.xsoft.am/wp-content/uploads/2021/12/Best-Programming-Languages-1.jpg",
       address: "26th Seraj str , Shiraz",
       contactEmail: "pl@test.com",
+      isFavorite: false,
     },
     {
       id: "a2",
       title: "Frameworks",
       subtitle: "Agreez what frameworks are suited for our needs",
       description: "In this agreez , we will have some experts in frameworks",
-      imageUrl: "https://miro.medium.com/max/2000/1*ItGd7Itb99Cr6rE4qVD8wg.png",
+      imageUrl:
+        "https://ares.decipherzone.com/blog-manager/uploads/banner_webp_6e31c361-f096-4a6a-a883-a561798afcd8.webp",
       address: "12th Eram blv , Shiraz",
       contactEmail: "fr@test.com",
+      isFavorite: false,
     },
   ];
 
-  function addAgreez(){
+  let editMode;
+
+  function addAgreez(event) {
     const newAgreez = {
       id: Math.random().toString(),
-      title: title ,
-      subtitle: subtitle,
-      description: description,
-      imageUrl: imageUrl,
-      contactEmail: email,
-      address: address
+      title: event.detail.title,
+      subtitle: event.detail.subtitle,
+      description: event.detail.description,
+      imageUrl: event.detail.imageUrl,
+      contactEmail: event.detail.email,
+      address: event.detail.address,
     };
-    agreezs = [newAgreez,...agreezs];
-  };
+    agreezs = [newAgreez, ...agreezs];
+    editMode = null;
+  }
+
+  function toggleFavorite(event) {
+    const id = event.detail;
+    const updatedAgreez = { ...agreezs.find((a) => a.id === id) };
+    updatedAgreez.isFavorite = !updatedAgreez.isFavorite;
+    const agreezIndex = agreezs.findIndex((a) => a.id === id);
+    const updatedAgreezs = [...agreezs];
+    updatedAgreezs[agreezIndex] = updatedAgreez;
+    agreezs = updatedAgreezs;
+  }
+
+  function cancelEdit(){
+    editMode = null;
+  }
 </script>
 
 <Header />
 
 <main>
-  <form on:submit|preventDefault="{addAgreez}">
-    <div class="form-control">
-      <label for="title">Title</label>
-      <input type="text" id="title" bind:value="{title}"/>
-    </div>
-    <div class="form-control">
-      <label for="subtitle">Subtitle</label>
-      <input type="text" id="subtitle" bind:value="{subtitle}"/>
-    </div>
-    <div class="form-control">
-      <label for="address">Address</label>
-      <input type="text" id="address" bind:value="{address}"/>
-    </div>
-    <div class="form-control">
-      <label for="imageUrl">Image URL</label>
-      <input type="text" id="imageUrl" bind:value="{imageUrl}"/>
-    </div>
-    <div class="form-control">
-      <label for="email">E-Mail</label>
-      <input type="email" id="email" bind:value="{email}"/>
-    </div>
-    <div class="form-control">
-      <label for="description">Description</label>
-      <textarea rows="3" id="description" bind:value="{description}"/>
-    </div>
-    <button type="submit">Save</button>
-  </form>
+  <div class="agreez-controls">
+    {#if editMode !== "add"}
+      <Button mode="outline"  on:click={() => (editMode = "add")} >New Agreez</Button>
+    {/if}
+  </div>
 
-  <AgreezGrid {agreezs} />
+  {#if editMode === "add"}
+    <EditAgreez on:save={addAgreez} on:cancel={cancelEdit} />
+  {/if}
+  <AgreezGrid {agreezs} on:toggleFavorite={toggleFavorite} />
 </main>
 
 <style>
   main {
     margin-top: 5rem;
+  }
+
+  .agreez-controls {
+    margin: 1rem;
   }
 </style>
