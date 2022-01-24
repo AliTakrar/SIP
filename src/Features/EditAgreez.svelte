@@ -3,29 +3,31 @@
   import TextInput from "../UI/TextInput.svelte";
   import Button from "../UI/Button.svelte";
   import Modal from "../UI/Modal.svelte";
-  import { isEmpty , isValidEmail } from "../helpers/validation.js";
+  import { isEmpty, isValidEmail , isValImageUrl } from "../helpers/validation.js";
 
   let title = "Title";
-  let titleValid = false;
   let subtitle = "Subtitle";
-  let subtitleValid = false;
   let address = "Address";
-  let addressValid = false;
   let email = "E-Mail";
-  let emailValid = false;
   let description = "Description";
-  let descriptionValid = false;
   let imageUrl = "Image Url";
-  let imageUrlValid = false;
 
   const dispatch = createEventDispatcher();
 
-  $: titleValid = !isEmpty(title);
-  $: subtitleValid = !isEmpty(subtitle);
-  $: addressValid = !isEmpty(address);
+  $: titleValid = !isEmpty(title , "Title");
+  $: subtitleValid = !isEmpty(subtitle , "Subtitle");
+  $: addressValid = !isEmpty(address , "Address" );
   $: emailValid = isValidEmail(email);
-  $: descriptionValid = !isEmpty(description);
-  $: imageUrlValid = !isEmpty(imageUrl);
+  $: descriptionValid = !isEmpty(description , "Description");
+  $: imageUrlValid = isValImageUrl(imageUrl);
+  $: formIsValid =
+    titleValid &&
+    subtitleValid &&
+    addressValid &&
+    emailValid &&
+    descriptionValid &&
+    imageUrlValid;
+
 
   function submitForm() {
     dispatch("save", {
@@ -82,7 +84,7 @@
       id="imageUrl"
       label="Image Url"
       valid={imageUrlValid}
-      validityMessage="Please enter a valid Image Url it should has atleast 3 characters."
+      validityMessage="The URL doesn't refer to an image or the image is not publicly accessible."
       value={imageUrl}
       on:click={(event) =>
         imageUrl === "Image Url"
@@ -107,20 +109,19 @@
       controlType="textarea"
       valid={descriptionValid}
       validityMessage="Please enter a valid Description it should has atleast 3 characters."
-      value={description}
       rows="3"
       on:click={(event) =>
         description === "Description"
           ? (description = "")
           : (description = event.target.value)}
-      on:input={(event) => (description = event.target.value)}
+      bind:value={description}
     />
   </form>
   <div slot="footer">
     <Button type="button" mode="outline" color={"success"} on:click={cancel}
       >Cancel</Button
     >
-    <Button type="button" mode="outline" on:click={submitForm}>Save</Button>
+    <Button type="button" mode="outline" disabled={!formIsValid} on:click={submitForm}>Save</Button>
   </div>
 </Modal>
 
